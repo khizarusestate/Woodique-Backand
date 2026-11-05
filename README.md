@@ -1,6 +1,6 @@
-# Eman Jewelers API
+# Woodique API
 
-Customer authentication and profile API for the Eman Jewelers storefront.
+Customer authentication and profile API for the Woodique storefront.
 
 ## Setup
 1. Install Node.js 20+.
@@ -18,7 +18,7 @@ Customer authentication and profile API for the Eman Jewelers storefront.
 - `DELETE /api/auth/account` — permanently delete account (requires password).
 - `GET /api/health` — health check.
 
-Passwords are hashed with bcrypt (12 rounds). Session JWTs are stored in HttpOnly cookies. Configure HTTPS in production and set exact trusted origins. Admin provisioning and admin-only routes must be added separately; public registration always creates customer accounts.
+Passwords are hashed with bcrypt (12 rounds). Session JWTs are stored in HttpOnly cookies. Configure HTTPS in production and set exact trusted origins. Administrator authentication and protected dashboard routes are provided under `/api/admin`. Public registration always creates customer accounts; administrator accounts must be provisioned using the protected script.
 
 ## Deployment
-Set environment variables in the hosting provider. Set `CLIENT_ORIGIN` to the deployed storefront origin. If the frontend and API are on different sites, use HTTPS and configure cookie/CORS settings for that deployment. Never commit `.env`.
+Set environment variables in the hosting provider. Set `CLIENT_ORIGIN` to the deployed Woodique storefront origin and `ADMIN_ORIGIN` to the deployed Woodique admin panel origin. If the frontend and API are on different sites, use HTTPS and configure cookie/CORS settings for that deployment. Never commit `.env`.
