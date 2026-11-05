@@ -32,7 +32,7 @@ router.post("/register", async (req, res, next) => {
     const passwordHash = await bcrypt.hash(password, 12);
     const user = await User.create({ name, email, passwordHash, phone: clean(req.body.phone), address: clean(req.body.address), city: clean(req.body.city), country: clean(req.body.country) || "Pakistan" });
     issueSession(res, user);
-    return res.status(201).json({ success: true, message: "Your Eman Jewelers account has been created.", user: user.toSafeJSON() });
+    return res.status(201).json({ success: true, message: "Your Woodique account has been created.", user: user.toSafeJSON() });
   } catch (error) { if (error.code === 11000) return res.status(409).json({ success: false, message: "An account with this email already exists." }); next(error); }
 });
 
