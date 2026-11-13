@@ -73,6 +73,28 @@ router.patch("/products/:id", async (req,res,next) => {
   }catch(error){next(error);}
 });
 router.delete("/products/:id", async (req,res,next) => { try { const product=await Product.findByIdAndUpdate(req.params.id,{$set:{active:false}},{new:true}); if(!product)return res.status(404).json({success:false,message:"Product not found."}); res.json({success:true,message:"Product archived."}); }catch(error){next(error);} });
+router.get("/search", async (req,res,next) => {
+  try {
+    const term=String(req.query.q||"").trim();
+    if(term.length<2)return res.json({success:true,results:{customers:[],products:[],orders:[],categories:[]}});
+    const regex=new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g,"\\router.get("/orders""),"i");
+    const [customers,products,orders,categories]=await Promise.all([
+      User.find({role:"customer",$or:[{name:regex},{email:regex},{phone:regex},{city:regex}]})
+        .select("name email phone city createdAt").sort({createdAt:-1}).limit(5).lean(),
+      Product.find({$or:[{name:regex},{category:regex},{description:regex},{tag:regex}]})
+        .select("name category price tag active").sort({createdAt:-1}).limit(5).lean(),
+      Order.find({$or:[{orderNumber:regex},{"customerSnapshot.name":regex},{"customerSnapshot.email":regex},{"customerSnapshot.phone":regex},{status:regex}]})
+        .sort({createdAt:-1}).limit(5).lean(),
+      Product.distinct("category",{category:regex})
+    ]);
+    res.json({success:true,results:{
+      customers:customers.map(item=>({...item,id:item._id.toString()})),
+      products:products.map(item=>({...item,id:item._id.toString()})),
+      orders:orders.map(item=>({...item,id:item._id.toString(),customer:item.customerSnapshot?.name||"Customer",email:item.customerSnapshot?.email||"",phone:item.customerSnapshot?.phone||""})),
+      categories:categories.slice(0,5)
+    }});
+  }catch(error){next(error);}
+});
 router.get("/orders", async (req,res,next) => {
   try {
     const page=Math.max(1,Number.parseInt(req.query.page,10)||1),limit=Math.min(100,Math.max(1,Number.parseInt(req.query.limit,10)||50));
