@@ -5,6 +5,7 @@ import Order from "../models/Order.js";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import rateLimit from "express-rate-limit";
+import requireAuth from "../middleware/requireAuth.js";
 const router=Router();
 router.get("/products",async(_req,res,next)=>{try{const products=await Product.find({active:true}).sort({createdAt:-1}).lean();res.json({success:true,products:products.map(p=>({...p,id:p._id.toString()}))});}catch(e){next(e);}});
 router.get("/products/:id",async(req,res,next)=>{try{if(!mongoose.isValidObjectId(req.params.id))return res.status(404).json({success:false,message:"Product not found."});const p=await Product.findOne({_id:req.params.id,active:true}).lean();if(!p)return res.status(404).json({success:false,message:"Product not found."});res.json({success:true,product:{...p,id:p._id.toString()}});}catch(e){next(e);}});
