@@ -17,7 +17,7 @@ router.post("/orders",requireAuth,async(req,res,next)=>{try{
  const products=await Product.find({_id:{$in:[...quantities.keys()]},active:true});if(products.length!==quantities.size)return res.status(400).json({success:false,message:"One or more products are unavailable. Refresh your cart."});
  const orderItems=products.map(p=>{const quantity=quantities.get(p._id.toString());return{product:p._id,name:p.name,image:p.image,category:p.category,unitPrice:p.price,quantity,lineTotal:p.price*quantity};});
  const total=orderItems.reduce((sum,i)=>sum+i.lineTotal,0);
- const order=await Order.create({orderNumber:`WD-${Date.now()}.toString(36).toUpperCase()}-${Math.random().toString(36).slice(2,6).toUpperCase()}`,customer:req.user._id,customerSnapshot:{name:req.user.name,email:req.user.email,phone,address,city,country},items:orderItems,subtotal:total,total,customerNote:String(customerNote).slice(0,500)});
+ const order=await Order.create({orderNumber:`WD-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2,6).toUpperCase()}`,customer:req.user._id,customerSnapshot:{name:req.user.name,email:req.user.email,phone,address,city,country},items:orderItems,subtotal:total,total,customerNote:String(customerNote).slice(0,500)});
  req.user.phone=phone;req.user.address=address;req.user.city=city;req.user.country=country;await req.user.save();
  res.status(201).json({success:true,message:"Your order has been saved.",order});
  }catch(e){next(e);}});
