@@ -24,7 +24,7 @@ router.post("/orders",orderLimiter,optionalAuth,async(req,res,next)=>{try{
  const email=String(req.user?.email??delivery.email??"").trim().toLowerCase();
  const phone=String(delivery.phone??req.user?.phone??"").trim(),address=String(delivery.address??req.user?.address??"").trim(),city=String(delivery.city??req.user?.city??"").trim(),country=String(delivery.country??req.user?.country??"Pakistan").trim();
  if(name.length<2||name.length>70)return res.status(400).json({success:false,message:"Please enter your full name (2–70 characters)."});
- if(email&&(!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)||email.length>254))return res.status(400).json({success:false,message:"Please enter a valid email address or leave it blank."});
+ if(email&&(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)||email.length>254))return res.status(400).json({success:false,message:"Please enter a valid email address or leave it blank."});
  if(phone.length<7||phone.length>25||address.length<5||address.length>300||city.length<2||city.length>80||country.length<2||country.length>80)return res.status(400).json({success:false,message:"Please enter a valid phone number, delivery address, city and country."});
  const quantities=new Map();
  for(const item of items){const id=String(item.productId||""),q=Number(item.quantity);if(!mongoose.isValidObjectId(id)||!Number.isInteger(q)||q<1||q>99)return res.status(400).json({success:false,message:"One or more cart items are invalid."});quantities.set(id,Math.min(99,(quantities.get(id)||0)+q));}
