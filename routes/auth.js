@@ -5,7 +5,7 @@ import User from "../models/User.js";
 import requireAuth from "../middleware/requireAuth.js";
 
 const router = Router();
-const cookieName = () => process.env.COOKIE_NAME || "eman_session";
+const cookieName = () => process.env.COOKIE_NAME || "woodique_session";
 const cookieOptions = () => ({
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
