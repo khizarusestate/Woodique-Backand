@@ -7,7 +7,7 @@ import Order from "../models/Order.js";
 import requireAdmin from "../middleware/requireAdmin.js";
 import { authLimiter } from "../middleware/rateLimit.js";
 const router = Router();
-const cookieName = () => process.env.COOKIE_NAME || "eman_session";
+const cookieName = () => process.env.COOKIE_NAME || "woodique_session";
 const options = () => ({ httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", maxAge: 7 * 24 * 60 * 60 * 1000, path: "/" });
 router.post("/login", authLimiter, async (req, res, next) => {
   try {
