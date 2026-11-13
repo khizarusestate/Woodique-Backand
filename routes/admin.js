@@ -77,7 +77,7 @@ router.get("/search", async (req,res,next) => {
   try {
     const term=String(req.query.q||"").trim();
     if(term.length<2)return res.json({success:true,results:{customers:[],products:[],orders:[],categories:[]}});
-    const regex=new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g,"\\router.get("/orders""),"i");
+    const regex=new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"),"i");
     const [customers,products,orders,categories]=await Promise.all([
       User.find({role:"customer",$or:[{name:regex},{email:regex},{phone:regex},{city:regex}]})
         .select("name email phone city createdAt").sort({createdAt:-1}).limit(5).lean(),
