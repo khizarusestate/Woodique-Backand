@@ -53,15 +53,18 @@ router.delete("/customers/:id", async (req,res,next) => { try { const result=awa
 router.get("/products", async (_req,res,next) => { try { const products=await Product.find().sort({createdAt:-1}).lean(); res.json({success:true,products:products.map(p=>({...p,id:p._id.toString()}))}); } catch(error){next(error);} });
 router.post("/products", async (req,res,next) => {
   try {
-    const {name,category,price,image,tag="",description="",material="",care=""}=req.body||{};
-    if(!String(name||"").trim()||!String(category||"").trim()||!Number.isFinite(Number(price))||Number(price)<0||!String(image||"").trim())return res.status(400).json({success:false,message:"Name, category, valid price and image URL are required."});
-    const product=await Product.create({name,category,price:Number(price),image,tag,description,material,care});
+    const {name,category,price,image,images=[],tag="",description="",material="",care=""}=req.body||{};
+    const gallery=Array.isArray(images)?images.filter(value=>typeof value==="string"&&value.trim()).slice(0,8):[];
+    const primaryImage=String(image||gallery[0]||"").trim();
+    if(!String(name||"").trim()||!String(category||"").trim()||!Number.isFinite(Number(price))||Number(price)<0||!primaryImage)return res.status(400).json({success:false,message:"Name, category, valid price and at least one image are required."});
+    const product=await Product.create({name,category,price:Number(price),image:primaryImage,images:gallery.length?gallery:[primaryImage],tag,description,material,care});
     res.status(201).json({success:true,product:{...product.toObject(),id:product._id.toString()}});
   }catch(error){next(error);}
 });
 router.patch("/products/:id", async (req,res,next) => {
   try {
-    const allowed=["name","category","price","image","tag","description","material","care","active"],updates={};
+    const allowed=["name","category","price","image","images","tag","description","material","care","active"],updates={};
+    if(Array.isArray(req.body.images))updates.images=req.body.images.filter(value=>typeof value==="string"&&value.trim()).slice(0,8);
     for(const key of allowed)if(req.body[key]!==undefined)updates[key]=req.body[key];
     if(updates.price!==undefined&&(!Number.isFinite(Number(updates.price))||Number(updates.price)<0))return res.status(400).json({success:false,message:"Enter a valid product price."});
     const product=await Product.findByIdAndUpdate(req.params.id,{$set:updates},{new:true,runValidators:true});
