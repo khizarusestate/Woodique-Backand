@@ -5,17 +5,23 @@ import User from "../models/User.js";
 import Product from "../models/Product.js";
 import Order from "../models/Order.js";
 import requireAdmin from "../middleware/requireAdmin.js";
+import { authLimiter } from "../middleware/rateLimit.js";
 const router = Router();
 const cookieName = () => process.env.COOKIE_NAME || "eman_session";
 const options = () => ({ httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", maxAge: 7 * 24 * 60 * 60 * 1000, path: "/" });
-router.post("/login", async (req, res) => {
-  const email = String(req.body.email || "").trim().toLowerCase();
-  const password = req.body.password;
-  const user = await User.findOne({ email, role: "admin" }).select("+passwordHash");
-  if (!user || typeof password !== "string" || !(await bcrypt.compare(password, user.passwordHash))) return res.status(401).json({ success: false, message: "Invalid administrator credentials." });
-  const token = jwt.sign({ sub: user._id.toString(), role: "admin" }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN || "7d" });
-  res.cookie(cookieName(), token, options());
-  res.json({ success: true, user: user.toSafeJSON() });
+router.post("/login", authLimiter, async (req, res, next) => {
+  try {
+    const email = String(req.body.email || "").trim().toLowerCase();
+    const password = req.body.password;
+    if (!email || typeof password !== "string" || !password) return res.status(400).json({ success: false, message: "Enter your administrator email and password." });
+    const user = await User.findOne({ email, role: "admin" }).select("+passwordHash");
+    if (!user || !(await bcrypt.compare(password, user.passwordHash))) return res.status(401).json({ success: false, message: "Invalid administrator credentials." });
+    const token = jwt.sign({ sub: user._id.toString(), role: "admin" }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN || "7d" });
+    res.cookie(cookieName(), token, options());
+    res.json({ success: true, user: user.toSafeJSON() });
+  } catch (error) {
+    next(error);
+  }
 });
 router.post("/logout", (_req,res) => { res.clearCookie(cookieName(), { ...options(), maxAge: undefined }); res.json({ success: true }); });
 router.use(requireAdmin);
