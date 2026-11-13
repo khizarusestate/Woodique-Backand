@@ -22,7 +22,7 @@ app.use(cookieParser());
 app.get("/api/health", (_req, res) => res.json({ success: true, service: "Woodique API" }));
 app.use("/api/auth", authLimiter, authRoutes);
 app.use("/api/store", storeRoutes);
-app.use("/api/admin", authLimiter, adminRoutes);
+app.use("/api/admin", adminRoutes);
 app.use((req, res) => res.status(404).json({ success: false, message: "The requested endpoint was not found." }));
 app.use((err, _req, res, _next) => {
   console.error(err);
